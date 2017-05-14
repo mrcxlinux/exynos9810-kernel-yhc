@@ -558,21 +558,18 @@ SYSCALL_DEFINE2(osf_getdomainname, char __user *, name, int, namelen)
 {
 	int len, err = 0;
 	char *kname;
-	char tmp[32];
 
-	if (namelen < 0 || namelen > 32)
+	if (namelen > 32)
 		namelen = 32;
 
 	down_read(&uts_sem);
 	kname = utsname()->domainname;
 	len = strnlen(kname, namelen);
-	len = min(len + 1, namelen);
-	memcpy(tmp, kname, len);
+	if (copy_to_user(name, kname, min(len + 1, namelen)))
+		err = -EFAULT;
 	up_read(&uts_sem);
 
-	if (copy_to_user(name, tmp, len))
-		return -EFAULT;
-	return 0;
+	return err;
 }
 
 /*
