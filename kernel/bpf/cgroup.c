@@ -95,7 +95,11 @@ static int compute_effective_progs(struct cgroup *cgrp,
 				   enum bpf_attach_type type,
 				   struct bpf_prog_array __rcu **array)
 {
+<<<<<<< HEAD
 	struct bpf_prog_array *progs;
+=======
+	struct bpf_prog_array __rcu *progs;
+>>>>>>> 86584b9c60df (UPSTREAM: bpf: multi program support for cgroup+bpf)
 	struct bpf_prog_list *pl;
 	struct cgroup *p = cgrp;
 	int cnt = 0;
@@ -120,12 +124,21 @@ static int compute_effective_progs(struct cgroup *cgrp,
 					    &p->bpf.progs[type], node) {
 				if (!pl->prog)
 					continue;
+<<<<<<< HEAD
 				progs->progs[cnt++] = pl->prog;
+=======
+				rcu_dereference_protected(progs, 1)->
+					progs[cnt++] = pl->prog;
+>>>>>>> 86584b9c60df (UPSTREAM: bpf: multi program support for cgroup+bpf)
 			}
 		p = cgroup_parent(p);
 	} while (p);
 
+<<<<<<< HEAD
 	rcu_assign_pointer(*array, progs);
+=======
+	*array = progs;
+>>>>>>> 86584b9c60df (UPSTREAM: bpf: multi program support for cgroup+bpf)
 	return 0;
 }
 
@@ -442,18 +455,9 @@ int __cgroup_bpf_run_filter_sk(struct sock *sk,
 			       enum bpf_attach_type type)
 {
 	struct cgroup *cgrp = sock_cgroup_ptr(&sk->sk_cgrp_data);
-	struct bpf_prog *prog;
-	int ret = 0;
+	int ret;
 
-
-	rcu_read_lock();
-
-	prog = rcu_dereference(cgrp->bpf.effective[type]);
-	if (prog)
-		ret = BPF_PROG_RUN(prog, sk) == 1 ? 0 : -EPERM;
-
-	rcu_read_unlock();
-
-	return ret;
+	ret = BPF_PROG_RUN_ARRAY(cgrp->bpf.effective[type], sk, BPF_PROG_RUN);
+	return ret == 1 ? 0 : -EPERM;
 }
 EXPORT_SYMBOL(__cgroup_bpf_run_filter_sk);
