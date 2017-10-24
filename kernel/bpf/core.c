@@ -1160,7 +1160,6 @@ struct bpf_prog *bpf_prog_select_runtime(struct bpf_prog *fp, int *err)
 }
 EXPORT_SYMBOL_GPL(bpf_prog_select_runtime);
 
-<<<<<<< HEAD
 static unsigned int __bpf_prog_ret1(const struct sk_buff *ctx,
 				    const struct bpf_insn *insn)
 {
@@ -1175,8 +1174,6 @@ static struct bpf_prog_dummy {
 	},
 };
 
-=======
->>>>>>> 86584b9c60df (UPSTREAM: bpf: multi program support for cgroup+bpf)
 /* to avoid allocating empty bpf_prog_array for cgroups that
  * don't have bpf program attached use one global 'empty_prog_array'
  * It will not be modified the caller of bpf_prog_array_alloc()
@@ -1190,11 +1187,7 @@ static struct {
 	.null_prog = NULL,
 };
 
-<<<<<<< HEAD
-struct bpf_prog_array *bpf_prog_array_alloc(u32 prog_cnt, gfp_t flags)
-=======
 struct bpf_prog_array __rcu *bpf_prog_array_alloc(u32 prog_cnt, gfp_t flags)
->>>>>>> 86584b9c60df (UPSTREAM: bpf: multi program support for cgroup+bpf)
 {
 	if (prog_cnt)
 		return kzalloc(sizeof(struct bpf_prog_array) +
@@ -1212,7 +1205,6 @@ void bpf_prog_array_free(struct bpf_prog_array __rcu *progs)
 	kfree_rcu(progs, rcu);
 }
 
-<<<<<<< HEAD
 void bpf_prog_array_delete_safe(struct bpf_prog_array __rcu *progs,
 				struct bpf_prog *old_prog)
 {
@@ -1280,8 +1272,6 @@ int bpf_prog_array_copy(struct bpf_prog_array __rcu *old_array,
 	return 0;
 }
 
-=======
->>>>>>> 86584b9c60df (UPSTREAM: bpf: multi program support for cgroup+bpf)
 static void bpf_prog_free_deferred(struct work_struct *work)
 {
 	struct bpf_prog_aux *aux;
