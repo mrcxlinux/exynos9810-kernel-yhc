@@ -744,7 +744,6 @@ static void mark_oom_victim(struct task_struct *tsk)
 	if (test_and_set_tsk_thread_flag(tsk, TIF_MEMDIE))
 		return;
 
-	/* oom_mm is bound to the signal struct life time. */
 	__mark_oom_victim(tsk);
 
 	/*
