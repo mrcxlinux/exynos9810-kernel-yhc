@@ -501,10 +501,15 @@ retry:
 			tsk->maj_flt++;
 			perf_sw_event(PERF_COUNT_SW_PAGE_FAULTS_MAJ, 1, regs,
 				      addr);
+			if (fault & VM_FAULT_SWAP)
+				mm_event_end(MM_SWP_FAULT, event_ts);
+			else
+				mm_event_end(MM_MAJ_FAULT, event_ts);
 		} else {
 			tsk->min_flt++;
 			perf_sw_event(PERF_COUNT_SW_PAGE_FAULTS_MIN, 1, regs,
 				      addr);
+			mm_event_end(MM_MIN_FAULT, event_ts);
 		}
 
 		return 0;
