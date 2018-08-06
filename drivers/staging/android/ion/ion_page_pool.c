@@ -28,11 +28,21 @@
 static void *ion_page_pool_alloc_pages(struct ion_page_pool *pool, bool zeroed)
 {
 	gfp_t gfp_mask = pool->gfp_mask;
+	struct page *page;
 
 	if (!zeroed)
 		gfp_mask &= ~__GFP_ZERO;
 
-	return alloc_pages(gfp_mask, pool->order);
+	page = alloc_pages(gfp_mask, pool->order);
+	if (!page) {
+		if (pool->order == 0)
+			perrfn("failed to alloc order-0 page (gfp %pGg)", &gfp_mask);
+		return NULL;
+	}
+
+	mm_event_count(MM_KERN_ALLOC, 1 << pool->order);
+
+	return page;
 }
 
 static void ion_page_pool_free_pages(struct ion_page_pool *pool,
