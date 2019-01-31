@@ -575,7 +575,6 @@ ifeq ($(ld-name),lld)
 KBUILD_CFLAGS	+= -fuse-ld=lld
 endif
 endif
-endif
 
 
 ifeq ($(mixed-targets),1)
