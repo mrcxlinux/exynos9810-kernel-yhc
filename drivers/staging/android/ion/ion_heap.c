@@ -26,6 +26,14 @@
 #include "ion.h"
 #include "ion_priv.h"
 
+#define MAX_DUMP_TASKS		8
+#define MAX_DUMP_NAME_LEN	32
+#define MAX_DUMP_BUFF_LEN	512
+
+char master_name[MAX_DUMP_BUFF_LEN];
+extern spinlock_t vmap_area_lock;
+extern struct rb_root vmap_area_root;
+
 void *ion_heap_map_kernel(struct ion_heap *heap,
 			  struct ion_buffer *buffer)
 {
