@@ -130,12 +130,6 @@ static void xfrm_policy_put_afinfo(const struct xfrm_policy_afinfo *afinfo)
 	rcu_read_unlock();
 }
 
-/* Called with rcu_read_lock(). */
-static const struct xfrm_if_cb *xfrm_if_get_cb(void)
-{
-	return rcu_dereference(xfrm_if_cb);
-}
-
 static inline struct dst_entry *__xfrm_dst_lookup(struct net *net,
 						  int tos, int oif,
 						  const xfrm_address_t *saddr,
@@ -2931,21 +2925,6 @@ int xfrm_policy_unregister_afinfo(struct xfrm_policy_afinfo *afinfo)
 	return err;
 }
 EXPORT_SYMBOL(xfrm_policy_unregister_afinfo);
-
-void xfrm_if_register_cb(const struct xfrm_if_cb *ifcb)
-{
-	spin_lock(&xfrm_if_cb_lock);
-	rcu_assign_pointer(xfrm_if_cb, ifcb);
-	spin_unlock(&xfrm_if_cb_lock);
-}
-EXPORT_SYMBOL(xfrm_if_register_cb);
-
-void xfrm_if_unregister_cb(void)
-{
-	RCU_INIT_POINTER(xfrm_if_cb, NULL);
-	synchronize_rcu();
-}
-EXPORT_SYMBOL(xfrm_if_unregister_cb);
 
 static int xfrm_dev_event(struct notifier_block *this, unsigned long event, void *ptr)
 {

@@ -145,26 +145,18 @@ static const struct {
 	const char *cipher_str;
 	int keysize;
 } available_modes[] = {
-	[FS_ENCRYPTION_MODE_AES_256_XTS] = {
-		.friendly_name = "AES-256-XTS",
-		.cipher_str = "xts(aes)",
-		.keysize = 64,
-	},
-	[FS_ENCRYPTION_MODE_AES_256_CTS] = {
-		.friendly_name = "AES-256-CTS-CBC",
-		.cipher_str = "cts(cbc(aes))",
-		.keysize = 32,
-	},
-	[FS_ENCRYPTION_MODE_AES_128_CBC] = {
-		.friendly_name = "AES-128-CBC",
-		.cipher_str = "cbc(aes)",
-		.keysize = 16,
-	},
-	[FS_ENCRYPTION_MODE_AES_128_CTS] = {
-		.friendly_name = "AES-128-CTS-CBC",
-		.cipher_str = "cts(cbc(aes))",
-		.keysize = 16,
-	},
+	[FS_ENCRYPTION_MODE_AES_256_XTS] = { "xts(aes)",
+					     FS_AES_256_XTS_KEY_SIZE },
+	[FS_ENCRYPTION_MODE_AES_256_CTS] = { "cts(cbc(aes))",
+					     FS_AES_256_CTS_KEY_SIZE },
+	[FS_ENCRYPTION_MODE_AES_128_CBC] = { "cbc(aes)",
+					     FS_AES_128_CBC_KEY_SIZE },
+	[FS_ENCRYPTION_MODE_AES_128_CTS] = { "cts(cbc(aes))",
+					     FS_AES_128_CTS_KEY_SIZE },
+	[FS_PRIVATE_ENCRYPTION_MODE_AES_256_XTS] = { "xts(aes)",
+						 FS_AES_256_XTS_KEY_SIZE },
+	[FS_PRIVATE_ENCRYPTION_MODE_AES_256_CBC] = { "cts(cbc(aes))",
+						 FS_AES_256_CTS_KEY_SIZE },
 };
 
 static int determine_cipher_type(struct fscrypt_info *ci, struct inode *inode,
