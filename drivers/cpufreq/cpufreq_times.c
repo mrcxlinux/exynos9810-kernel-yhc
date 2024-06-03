@@ -155,7 +155,7 @@ static int single_uid_time_in_state_show(struct seq_file *m, void *ptr)
 	}
 
 	for (i = 0; i < uid_entry->max_state; ++i) {
-		u64 time = nsec_to_clock_t(uid_entry->time_in_state[i]);
+		u64 time = cputime_to_clock_t(uid_entry->time_in_state[i]);
 		seq_write(m, &time, sizeof(time));
 	}
 
