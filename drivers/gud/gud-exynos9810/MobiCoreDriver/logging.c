@@ -182,6 +182,7 @@ static inline int log_msg(void *data)
 
 static void log_worker(struct work_struct *work)
 {
+#if 0
 	static DEFINE_MUTEX(local_mutex);
 
 	mutex_lock(&local_mutex);
@@ -200,6 +201,7 @@ static void log_worker(struct work_struct *work)
 			log_ctx.tail = 0;
 	}
 	mutex_unlock(&local_mutex);
+#endif
 }
 
 /*
@@ -209,9 +211,11 @@ static void log_worker(struct work_struct *work)
  */
 void mc_logging_run(void)
 {
+#if 0
 	if (log_ctx.enabled && !log_ctx.dead &&
 	    log_ctx.trace_buf->head != log_ctx.tail)
 		schedule_work(&log_ctx.work);
+#endif
 }
 
 int mc_logging_start(void)
