@@ -36,7 +36,6 @@ static void *ion_page_pool_alloc_pages(struct ion_page_pool *pool, bool zeroed)
 	page = alloc_pages(gfp_mask, pool->order);
 	if (!page) {
 		if (pool->order == 0)
-			perrfn("failed to alloc order-0 page (gfp %pGg)", &gfp_mask);
 		return NULL;
 	}
 

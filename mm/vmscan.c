@@ -3760,7 +3760,7 @@ static int kswapd(void *p)
 
 		ktime_t event_ts;
 		alloc_order = reclaim_order = pgdat->kswapd_order;
-		classzone_idx = kswapd_classzone_idx(pgdat, classzone_idx);
+		classzone_idx = pgdat->kswapd_classzone_idx;
 
 kswapd_try_sleep:
 		kswapd_try_to_sleep(pgdat, alloc_order, reclaim_order,
@@ -3793,11 +3793,11 @@ kswapd_try_sleep:
 		 */
 		trace_mm_vmscan_kswapd_wake(pgdat->node_id, classzone_idx,
 						alloc_order);
-		fs_reclaim_acquire(GFP_KERNEL);
+		lockdep_set_current_reclaim_state(sc.gfp_mask);
 		mm_event_start(&event_ts);
 		reclaim_order = balance_pgdat(pgdat, alloc_order, classzone_idx);
 		mm_event_end(MM_RECLAIM, event_ts);
-		fs_reclaim_release(GFP_KERNEL);
+		lockdep_clear_current_reclaim_state();
 		if (reclaim_order < alloc_order)
 			goto kswapd_try_sleep;
 

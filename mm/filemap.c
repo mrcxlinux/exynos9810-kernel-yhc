@@ -13,6 +13,7 @@
 #include <linux/compiler.h>
 #include <linux/dax.h>
 #include <linux/fs.h>
+#include <linux/sched.h>
 #include <linux/uaccess.h>
 #include <linux/capability.h>
 #include <linux/kernel_stat.h>
@@ -1874,7 +1875,7 @@ static ssize_t do_generic_file_read(struct file *filp, loff_t *ppos,
 		unsigned long nr, ret;
 		ktime_t event_ts;
 
-		event_ts = 0;
+		event_ts = ktime_set(0, 0);
 		cond_resched();
 find_page:
 		if (fatal_signal_pending(current)) {
@@ -1926,7 +1927,7 @@ find_page:
 			unlock_page(page);
 		}
 page_ok:
-		if (event_ts != 0)
+		if (ktime_to_ns(event_ts) != 0)
 			mm_event_end(MM_READ_IO, event_ts);
 		/*
 		 * i_size must be checked after we know the page is Uptodate.
