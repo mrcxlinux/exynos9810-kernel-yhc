@@ -36,8 +36,3 @@ obj-$(CONFIG_PCMCIA_WL3501)	+= wl3501_cs.o
 obj-$(CONFIG_USB_NET_RNDIS_WLAN)	+= rndis_wlan.o
 
 obj-$(CONFIG_MAC80211_HWSIM)	+= mac80211_hwsim.o
-
-subdir-ccflags-y += -Wno-sizeof-pointer-memaccess
-subdir-ccflags-y += -Wno-stringop-overflow
-
-obj-$(CONFIG_VIRT_WIFI)	+= virt_wifi.o
