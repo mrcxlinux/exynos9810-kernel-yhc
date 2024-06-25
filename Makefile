@@ -307,6 +307,10 @@ HOSTCC       = gcc
 HOSTCXX      = g++
 HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
 HOSTCXXFLAGS = -O2
+ifeq ($(CONFIG_EXYNOS_FMP_FIPS),)
+READELF        = $(CROSS_COMPILE)readelf
+export READELF
+endif
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
