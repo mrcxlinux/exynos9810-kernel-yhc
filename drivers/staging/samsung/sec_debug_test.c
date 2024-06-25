@@ -504,7 +504,7 @@ static void simulate_WRITE_RO(char *arg)
 
 	pr_crit("%s()\n", __func__);
 
-	ptr = (unsigned long *)simulate_WRITE_RO;
+	ptr = NULL;
 	*ptr ^= 0x12345678;
 }
 
