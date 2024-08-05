@@ -34,8 +34,8 @@ CR_KERNEL=$CR_DIR/arch/arm64/boot/Image
 # Compiled dtb by dtbtool
 CR_DTB=$CR_DIR/arch/arm64/boot/dtb.img
 # Kernel Name and Version
-CR_VERSION=V6.0
-CR_NAME=Apollo_ACK-Q
+CR_VERSION=V1.0
+CR_NAME=DS-ACK
 # Thread count
 CR_JOBS=$(nproc --all)
 # Target Android version
@@ -44,7 +44,7 @@ CR_PLATFORM=13.0.0
 # Target ARCH
 CR_ARCH=arm64
 # Current Date
-CR_DATE=$(date +%Y%m%d)
+CR_DATE=$(date +%d.%m.%Y)
 # General init
 export ANDROID_MAJOR_VERSION=$CR_ANDROID
 export PLATFORM_VERSION=$CR_PLATFORM
@@ -72,11 +72,17 @@ CR_SELINUX="1"
 CR_KSU="n"
 CR_CLEAN="n"
 # Compiler Paths
-CR_GCC4=~/Android/Toolchains/aarch64-linux-android-4.9/bin/aarch64-linux-android-
-CR_GCC9=~/Android/Toolchains/aarch64-linux-gnu-9.x/bin/aarch64-linux-gnu-
-CR_GCC12=~/Android/Toolchains/aarch64-linux-gnu-12.x/bin/aarch64-linux-gnu-
-CR_GCC13=~/Android/Toolchains/aarch64-linux-gnu-13.x/bin/aarch64-linux-gnu-
-CR_CLANG=~/Android/Toolchains/clang-r353983c/bin
+CR_GCC4=~/compiler/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+CR_GCC9=~/compiler/aarch64-linux-gnu-9.x/bin/aarch64-linux-gnu-
+CR_GCC12=~/compiler/aarch64-linux-gnu-12.x/bin/aarch64-linux-gnu-
+CR_GCC13=~/compiler/aarch64-linux-gnu-13.x/bin/aarch64-linux-gnu-
+CR_CLANG_11=~/compiler/clang-r383902b-11.0.2
+CR_CLANG_12=~/compiler/clang-r416183b-12.0.0
+CR_CLANG_14=~/compiler/clang-r450784d-13.0.0
+CR_CLANG_18=~/compiler/clang-r522817-18.0.1
+CR_CLANG_18N=~/compiler/neutron-clang-05012024
+CR_CLANG_19=~/compiler/clang19-18.07.24
+CR_CLANG_20=~/compiler/clang20-26.07.24
 #####################################################
 
 # Compiler Selection
@@ -102,12 +108,48 @@ export CROSS_COMPILE=$CR_GCC13
 compile="make"
 CR_COMPILER="$CR_GCC13"
 fi
-if [ $CR_COMPILER = "5" ]; then
-export CLANG_PATH=$CR_CLANG
-export CROSS_COMPILE=$CR_GCC4
+if [ $CR_COMPILER = "5" ] || [ $CR_COMPILER = "6" ] || [ $CR_COMPILER = "7" ] || [ $CR_COMPILER = "8" ] || [ $CR_COMPILER = "9" ] || [ $CR_COMPILER = "10" ] || [ $CR_COMPILER = "11" ]; then
+    if [ $CR_COMPILER = "5" ]; then
+        CR_CLANG=$CR_CLANG_11
+    elif [ $CR_COMPILER = "6" ]; then
+        CR_CLANG=$CR_CLANG_12
+    elif [ $CR_COMPILER = "7" ]; then
+        CR_CLANG=$CR_CLANG_14
+    elif [ $CR_COMPILER = "8" ]; then
+        CR_CLANG=$CR_CLANG_18
+    elif [ $CR_COMPILER = "9" ]; then
+        CR_CLANG=$CR_CLANG_18N
+    elif [ $CR_COMPILER = "10" ]; then
+        CR_CLANG=$CR_CLANG_19
+    elif [ $CR_COMPILER = "11" ]; then
+        CR_CLANG=$CR_CLANG_20		
+    fi
+
+# Check packages
+for pkg in gcc-arm-linux-gnueabi gcc-aarch64-linux-gnu; do
+if ! dpkg-query -W -f='${Status}' $pkg | grep "ok installed"; then
+    echo " $pkg is missing, please install with sudo apt-get install $pkg"
+    exit 0;
+fi
+done
+
+export PATH=$CR_CLANG/bin:$CR_CLANG/lib:${PATH}
 export CLANG_TRIPLE=aarch64-linux-gnu-
-compile="make CC=clang ARCH=arm64"
-export PATH=${CLANG_PATH}:${PATH}
+export CROSS_COMPILE=$CR_CLANG_18N/bin/aarch64-linux-gnu-
+export CROSS_COMPILE_ARM32=$CR_CLANG_18N/arm-linux-gnueabi-
+export CC=$CR_CLANG/bin/clang
+export REAL_CC=$CR_CLANG/bin/clang
+export LD=$CR_CLANG/bin/ld.lld
+export AR=$CR_CLANG/bin/llvm-ar
+export NM=$CR_CLANG/bin/llvm-nm
+export OBJCOPY=$CR_CLANG/bin/llvm-objcopy
+export OBJDUMP=$CR_CLANG/bin/llvm-objdump
+export READELF=$CR_CLANG/bin/llvm-readelf
+export STRIP=$CR_CLANG/bin/llvm-strip
+export LLVM=1
+export LLVM_IAS=1
+export ARCH=arm64 && export SUBARCH=arm64
+compile="make ARCH=arm64 CC=clang"
 CR_COMPILER="$CR_CLANG"
 fi
 }
@@ -190,7 +232,7 @@ BUILD_GENERATE_CONFIG()
   if [ $CR_KSU = "y" ]; then
     echo " Building KernelSU Kernel"
     echo "CONFIG_KSU=y" >> $CR_DIR/arch/$CR_ARCH/configs/tmp_defconfig
-    CR_IMAGE_NAME=$CR_IMAGE_NAME-ksu
+    CR_IMAGE_NAME=$CR_IMAGE_NAME-KSU
     zver=$zver-KernelSU
   else
     echo "# CONFIG_KSU is not set" >> $CR_DIR/arch/$CR_ARCH/configs/tmp_defconfig
@@ -279,7 +321,7 @@ PACK_BOOT_IMG()
         echo " Abort "
 	fi
 	# Remove red warning at boot
-	echo -n "SEANDROIDENFORCE" » $CR_AIK/image-new.img
+	echo -n "SEANDROIDENFORCE" >> $CR_AIK/image-new.img
 	# Copy boot.img to Production folder
 	if [ ! -e $CR_PRODUCT ]; then
         mkdir $CR_PRODUCT
@@ -391,14 +433,14 @@ BUILD_DEBUG(){
 echo "----------------------------------------------"
 echo " DEBUG : Debug build initiated "
 CR_TARGET=5
-CR_COMPILER=2
-CR_SELINUX=1
+CR_COMPILER=8
+CR_SELINUX=0
 CR_KSU="y"
 CR_CLEAN="n"
 echo " DEBUG : Set Build options "
 echo " DEBUG : Variant  : $CR_VARIANT_G965N"
-echo " DEBUG : Compiler : $CR_GCC9"
-echo " DEBUG : Selinux  : $CR_SELINUX Permissive"
+echo " DEBUG : Compiler : $CR_CLANG_18"
+echo " DEBUG : Selinux  : $CR_SELINUX Enforcing"
 echo " DEBUG : Clean    : $CR_CLEAN"
 echo "----------------------------------------------"
 BUILD
@@ -508,11 +550,17 @@ echo "1) $CR_GCC4 (GCC 4.9)"
 echo "2) $CR_GCC9 (GCC 9.x)" 
 echo "3) $CR_GCC12 (GCC 12.x)" 
 echo "4) $CR_GCC13 (GCC 13.x)" 
-echo "5) $CR_CLANG (CLANG)" 
+echo "5) $CR_CLANG_11 (Clang 11 - Samsung)"
+echo "6) $CR_CLANG_12 (Clang 12)" 
+echo "7) $CR_CLANG_14 (Clang 14)"
+echo "8) $CR_CLANG_18 (Clang 18)"
+echo "9) $CR_CLANG_18N (Neutron Clang 18)"
+echo "10) $CR_CLANG_19 (Clang 19)"
+echo "11) $CR_CLANG_20 (Clang 20)"
 echo " "
-read -p "Please select your compiler (1-5) > " CR_COMPILER
+read -p "Please select your compiler (1-11) > " CR_COMPILER
 echo " "
-echo "1) Selinux Permissive " "2) Selinux Enforcing"
+echo "1) SELinux Permissive " "2) SELinux Enforcing"
 echo " "
 read -p "Please select your SElinux mode (1-2) > " CR_SELINUX
 echo " "
