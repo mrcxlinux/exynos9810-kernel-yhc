@@ -646,12 +646,8 @@ EXPORT_SYMBOL(warn_slowpath_null);
  */
 __visible void __stack_chk_fail(void)
 {
-#ifdef CONFIG_SEC_DEBUG
-	BUG();
-#else
-	panic("stack-protector: Kernel stack is corrupted in: %p\n",
+	panic("stack-protector: Kernel stack is corrupted in: %pB\n",
 		__builtin_return_address(0));
-#endif
 }
 EXPORT_SYMBOL(__stack_chk_fail);
 
