@@ -2441,26 +2441,44 @@ static void dw_mci_tasklet_func(unsigned long priv)
 			}
 
 			if (cmd->data && err) {
-				dw_mci_fifo_reset(host->dev, host);
+				/*
+				 * During UHS tuning sequence, sending the stop
+				 * command after the response CRC error would
+				 * throw the system into a confused state
+				 * causing all future tuning phases to report
+				 * failure.
+				 *
+				 * In such case controller will move into a data
+				 * transfer state after a response error or
+				 * response CRC error. Let's let that finish
+				 * before trying to send a stop, so we'll go to
+				 * STATE_SENDING_DATA.
+				 *
+				 * Although letting the data transfer take place
+				 * will waste a bit of time (we already know
+				 * the command was bad), it can't cause any
+				 * errors since it's possible it would have
+				 * taken place anyway if this tasklet got
+				 * delayed. Allowing the transfer to take place
+				 * avoids races and keeps things simple.
+				 */
+				if (err != -ETIMEDOUT) {
+					state = STATE_SENDING_DATA;
+					continue;
+				}
+
 				dw_mci_stop_dma(host);
 				send_stop_abort(host, data);
 				state = STATE_SENDING_STOP;
-				dw_mci_debug_req_log(host,
-						host->mrq,
-						STATE_REQ_CMD_PROCESS, state);
 				break;
 			}
 
 			if (!cmd->data || err) {
-				if (host->sw_timeout_chk != true)
-					dw_mci_request_end(host, mrq);
+				dw_mci_request_end(host, mrq);
 				goto unlock;
 			}
 
 			prev_state = state = STATE_SENDING_DATA;
-			dw_mci_debug_req_log(host, host->mrq,
-					STATE_REQ_CMD_PROCESS, state);
-
 			/* fall through */
 
 		case STATE_SENDING_DATA:
