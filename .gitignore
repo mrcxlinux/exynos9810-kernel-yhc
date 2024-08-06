@@ -142,6 +142,11 @@ arch/arm64/configs/tmp_defconfig
 drivers/gator_5.27/generated_gator_src_md5.h
 scripts/crypto/__pycache__/*
 scripts/fmp/__pycache__/*
+drivers/gator_5.27/gator_src_md5.h
+firmware/five/ffffffff000000000000000000000072.tlbin
+net/wireguard/crypto/zinc/chacha20/chacha20-arm64.S
+net/wireguard/crypto/zinc/poly1305/poly1305-arm64.S
+scripts/dtbtool_exynos/dtbtool
 
 # KSU
 drivers/kernelsu/*
