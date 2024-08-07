@@ -107,16 +107,28 @@ walt_dec_cumulative_runnable_avg(struct rq *rq,
 {
 	rq->cumulative_runnable_avg -= p->ravg.demand;
 	BUG_ON((s64)rq->cumulative_runnable_avg < 0);
+
+	/*
+	 * on_rq will be 1 for sleeping tasks. So check if the task
+	 * is migrating or dequeuing in RUNNING state to change the
+	 * prio/cgroup/class.
+	 */
+	if (task_on_rq_migrating(p) || p->state == TASK_RUNNING)
+		fixup_cum_window_demand(rq, -(s64)p->ravg.demand);
 }
 
-static void
-fixup_cumulative_runnable_avg(struct rq *rq,
-			      struct task_struct *p, s64 task_load_delta)
+void
+walt_fixup_cumulative_runnable_avg(struct rq *rq,
+				   struct task_struct *p, u64 new_task_load)
 {
+	s64 task_load_delta = (s64)new_task_load - task_load(p);
+
 	rq->cumulative_runnable_avg += task_load_delta;
 	if ((s64)rq->cumulative_runnable_avg < 0)
 		panic("cra less than zero: tld: %lld, task_load(p) = %u\n",
 			task_load_delta, task_load(p));
+
+	fixup_cum_window_demand(rq, task_load_delta);
 }
 
 u64 walt_ktime_clock(void)
@@ -599,9 +611,19 @@ static void update_history(struct rq *rq, struct task_struct *p,
 	 * changing p->on_rq. Since the dequeue decrements hmp stats
 	 * avoid decrementing it here again.
 	 */
+<<<<<<< HEAD
 	if (task_on_rq_queued(p) && (!task_has_dl_policy(p) ||
 						!p->dl.dl_throttled))
 		fixup_cumulative_runnable_avg(rq, p, demand);
+=======
+	if (!task_has_dl_policy(p) || !p->dl.dl_throttled) {
+		if (task_on_rq_queued(p))
+			p->sched_class->fixup_cumulative_runnable_avg(rq, p,
+								      demand);
+		else if (rq->curr == p)
+			fixup_cum_window_demand(rq, demand);
+	}
+>>>>>>> 95eb4d8
 
 	p->ravg.demand = demand;
 
