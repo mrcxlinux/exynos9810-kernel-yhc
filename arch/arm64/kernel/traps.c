@@ -854,19 +854,10 @@ asmlinkage void bad_mode(struct pt_regs *regs, int reason, unsigned int esr)
 {
 	console_verbose();
 
-	pr_auto(ASL1,
-		"Bad mode in %s handler detected on CPU%d, code 0x%08x -- %s\n",
+	pr_crit("Bad mode in %s handler detected on CPU%d, code 0x%08x -- %s\n",
 		handler[reason], smp_processor_id(), esr,
 		esr_get_class_string(esr));
 
-#ifdef CONFIG_SEC_DEBUG_EXTRA_INFO
-	if (!user_mode(regs)) {
-		sec_debug_set_extra_info_fault(BAD_MODE_FAULT, (unsigned long)regs->pc, regs);
-		sec_debug_set_extra_info_esr(esr);
-	}
-#endif
-
-	die("Oops - bad mode", regs, 0);
 	local_irq_disable();
 	panic("bad mode");
 }
