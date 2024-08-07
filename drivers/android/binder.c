@@ -2144,6 +2144,7 @@ static struct binder_thread *binder_get_txn_from_and_acq_inner(
 static void binder_free_transaction(struct binder_transaction *t)
 {
 	struct binder_proc *target_proc;
+	
 	spin_lock(&t->lock);
 	target_proc = t->to_proc;
 	if (target_proc) {
