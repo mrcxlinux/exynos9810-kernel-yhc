@@ -22,6 +22,7 @@
 #endif   
 
 #define SCSI_LOG_SPOOLSIZE 4096
+#define SCSI_LOG_BUFSIZE 128
 
 #if (SCSI_LOG_SPOOLSIZE / SCSI_LOG_BUFSIZE) > BITS_PER_LONG
 #warning SCSI logging bitmask too large
