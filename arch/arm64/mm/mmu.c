@@ -123,7 +123,6 @@ static bool pgattr_change_is_safe(u64 old, u64 new)
 	return old  == 0 || new  == 0 || ((old ^ new) & ~mask) == 0;
 }
 
->>>>>>> 5af9b7f917846d293c8b25c7f2b8144b0d79c751
 static void alloc_init_pte(pmd_t *pmd, unsigned long addr,
 				  unsigned long end, unsigned long pfn,
 				  pgprot_t prot,
