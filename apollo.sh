@@ -79,9 +79,9 @@ CR_GCC13=~/compiler/aarch64-linux-gnu-13.x/bin/aarch64-linux-gnu-
 CR_CLANG_11=~/compiler/clang-r383902b-11.0.2
 CR_CLANG_12=~/compiler/clang-r416183b-12.0.7
 CR_CLANG_14=~/compiler/clang-r450784d-14.0.6
-CR_CLANG_18=~/compiler/clang-r522817-18.0.1
-CR_CLANG_18N=~/compiler/neutron-clang-05012024
-CR_CLANG_19N=~/compiler/neutron-clang-10032024
+CR_CLANG_18=~/compiler/clang-18.0.1-r522817
+CR_CLANG_18N=~/compiler/neutron-clang-18.0.0
+CR_CLANG_19N=~/compiler/neutron-clang-19.0.0
 CR_CLANG_20=~/compiler/clang20-26.07.24
 #####################################################
 
