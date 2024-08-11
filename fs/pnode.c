@@ -290,26 +290,17 @@ static int propagate_one(struct mount *m)
 	/* Notice when we are propagating across user namespaces */
 	if (m->mnt_ns->user_ns != user_ns)
 		type |= CL_UNPRIVILEGED;
-#ifdef CONFIG_RKP_NS_PROT
-	child = copy_tree(last_source, last_source->mnt->mnt_root, type);
-#else
 	child = copy_tree(last_source, last_source->mnt.mnt_root, type);
-#endif
 	if (IS_ERR(child))
 		return PTR_ERR(child);
-#ifdef CONFIG_RKP_NS_PROT
-	rkp_reset_mnt_flags(child->mnt,MNT_LOCKED);
-#else
 	child->mnt.mnt_flags &= ~MNT_LOCKED;
-#endif
+	read_seqlock_excl(&mount_lock);
 	mnt_set_mountpoint(m, mp, child);
+	if (m->mnt_master != dest_master)
+		SET_MNT_MARK(m->mnt_master);
+	read_sequnlock_excl(&mount_lock);
 	last_dest = m;
 	last_source = child;
-	if (m->mnt_master != dest_master) {
-		read_seqlock_excl(&mount_lock);
-		SET_MNT_MARK(m->mnt_master);
-		read_sequnlock_excl(&mount_lock);
-	}
 	hlist_add_head(&child->mnt_hash, list);
 	return count_mounts(m->mnt_ns, child);
 }
