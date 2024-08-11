@@ -42,11 +42,8 @@
 #include <linux/sched/sysctl.h>
 #include <linux/slab.h>
 #include <linux/compat.h>
-<<<<<<< HEAD
 #include <linux/exynos-ss.h>
-=======
 #include <linux/random.h>
->>>>>>> 1e7b6edbb5ae4bea20fa189676e780f90e94256a
 
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
