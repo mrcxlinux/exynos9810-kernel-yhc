@@ -1883,4 +1883,3 @@ static struct usb_function *ncm_alloc(struct usb_function_instance *fi)
 DECLARE_USB_FUNCTION_INIT(ncm, ncm_alloc_inst, ncm_alloc);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Yauheni Kaliuta");
-
