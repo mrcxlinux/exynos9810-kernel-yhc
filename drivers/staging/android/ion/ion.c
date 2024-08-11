@@ -1388,21 +1388,11 @@ static void *ion_dma_buf_vmap(struct dma_buf *dmabuf)
 		       __func__);
 		return ERR_PTR(-ENODEV);
 	}
-
 	mutex_lock(&buffer->lock);
 	vaddr = ion_buffer_kmap_get(buffer);
 	mutex_unlock(&buffer->lock);
 
 	return vaddr;
-}
-
-static void ion_dma_buf_vunmap(struct dma_buf *dmabuf, void *ptr)
-{
-	struct ion_buffer *buffer = dmabuf->priv;
-
-	mutex_lock(&buffer->lock);
-	ion_buffer_kmap_put(buffer);
-	mutex_unlock(&buffer->lock);
 }
 
 static void *ion_dma_buf_kmap(struct dma_buf *dmabuf, unsigned long offset)
@@ -1435,6 +1425,7 @@ static void ion_dma_buf_kunmap(struct dma_buf *dmabuf, unsigned long offset,
 		ion_buffer_kmap_put(buffer);
 		mutex_unlock(&buffer->lock);
 	}
+
 }
 
 static int ion_dma_buf_begin_cpu_access(struct dma_buf *dmabuf,
@@ -1442,6 +1433,16 @@ static int ion_dma_buf_begin_cpu_access(struct dma_buf *dmabuf,
 {
 	return 0;
 }
+
+static void ion_dma_buf_vunmap(struct dma_buf *dmabuf, void *ptr)
+{
+  struct ion_buffer *buffer = dmabuf->priv;
+
+  mutex_lock(&buffer->lock);
+  ion_buffer_kmap_put(buffer);
+  mutex_unlock(&buffer->lock);
+}
+
 
 static int ion_dma_buf_end_cpu_access(struct dma_buf *dmabuf,
 				      enum dma_data_direction direction)
