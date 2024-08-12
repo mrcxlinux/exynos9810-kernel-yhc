@@ -329,7 +329,7 @@ alternative_else_nop_endif
 #endif
 	.else
 	ldr	lr, [sp, #S_LR]
-	add	sp, sp, #S_FRAME_SIZE		// restore sp
+	add	sp, sp, #(S_FRAME_SIZE+PRESERVE_STACK_SIZE)
 	eret
 	.endif
 	.endm
@@ -1205,9 +1205,13 @@ __ni_sys_trace:
 #ifdef CONFIG_RANDOMIZE_BASE
 	tramp_data_page		\dst
 	add	\dst, \dst, #:lo12:__entry_tramp_data_\var
+#ifdef CONFIG_QCOM_FALKOR_ERRATUM_1003
+alternative_insn isb, nop, ARM64_WORKAROUND_QCOM_FALKOR_E1003
+#else
 #ifndef CONFIG_ARCH_MSM8996
 	isb
-#endif
+#endif /* CONFIG_ARCH_MSM8996 */
+#endif /*CONFIG_QCOM_FALKOR_ERRATUM_1003 */
 	ldr	\dst, [\dst]
 #else
 	ldr	\dst, =\var
@@ -1311,7 +1315,11 @@ alternative_endif
  */
 	.pushsection ".entry.tramp.text", "ax"
 	.align	11
+#ifdef CONFIG_RKP_CFP_JOPP
+VECTOR_ENTRY(tramp_vectors)
+#else
 ENTRY(tramp_vectors)
+#endif
 #ifdef CONFIG_MITIGATE_SPECTRE_BRANCH_HISTORY
 	generate_tramp_vector	kpti=1, bhb=BHB_MITIGATION_LOOP
 	generate_tramp_vector	kpti=1, bhb=BHB_MITIGATION_FW
