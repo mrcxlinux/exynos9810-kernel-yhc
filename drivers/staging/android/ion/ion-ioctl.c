@@ -173,9 +173,7 @@ long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				data.allocation.flags, PTR_ERR(handle));
 			return PTR_ERR(handle);
 		}
-
 		data.allocation.handle = handle->id;
-
 		cleanup_handle = handle;
 		pass_to_user(handle);
 		break;
@@ -269,6 +267,5 @@ long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	}
 	if (cleanup_handle)
 		ion_handle_put(client, cleanup_handle);
-
 	return ret;
 }
