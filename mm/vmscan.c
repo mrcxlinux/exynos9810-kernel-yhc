@@ -48,6 +48,7 @@
 #include <linux/printk.h>
 #include <linux/dax.h>
 #include <linux/psi.h>
+#include <linux/mmzone.h>
 
 #include <asm/tlbflush.h>
 #include <asm/div64.h>
