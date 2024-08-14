@@ -95,11 +95,7 @@ static int compute_effective_progs(struct cgroup *cgrp,
 				   enum bpf_attach_type type,
 				   struct bpf_prog_array __rcu **array)
 {
-<<<<<<< HEAD
-	struct bpf_prog_array *progs;
-=======
 	struct bpf_prog_array __rcu *progs;
->>>>>>> 86584b9c60df (UPSTREAM: bpf: multi program support for cgroup+bpf)
 	struct bpf_prog_list *pl;
 	struct cgroup *p = cgrp;
 	int cnt = 0;
@@ -124,21 +120,13 @@ static int compute_effective_progs(struct cgroup *cgrp,
 					    &p->bpf.progs[type], node) {
 				if (!pl->prog)
 					continue;
-<<<<<<< HEAD
-				progs->progs[cnt++] = pl->prog;
-=======
 				rcu_dereference_protected(progs, 1)->
 					progs[cnt++] = pl->prog;
->>>>>>> 86584b9c60df (UPSTREAM: bpf: multi program support for cgroup+bpf)
 			}
 		p = cgroup_parent(p);
 	} while (p);
 
-<<<<<<< HEAD
-	rcu_assign_pointer(*array, progs);
-=======
 	*array = progs;
->>>>>>> 86584b9c60df (UPSTREAM: bpf: multi program support for cgroup+bpf)
 	return 0;
 }
 
