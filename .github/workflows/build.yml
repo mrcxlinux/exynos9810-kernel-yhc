@@ -1,4 +1,4 @@
-name: Compile kernel
+name: Compile Kernel
 
 on:
   workflow_dispatch:
@@ -29,6 +29,22 @@ on:
           - "Neutron Clang 18 (^)"
           - "Neutron Clang 19 (^)"
           - "Neutron Clang 20 (BETA)"
+
+      selinux:
+        description: 'Choose SELinux mode'
+        required: true
+        type: choice
+        options:
+          - "SELinux Permissive"
+          - "SELinux Enforcing"
+
+      kernel_su:
+        description: 'Include KernelSU?'
+        required: true
+        type: choice
+        options:
+          - "Yes"
+          - "No"
 
 jobs:
   run-apollo-script:
@@ -72,8 +88,27 @@ jobs:
           esac
           echo "TOOLCHAIN_INPUT=${TOOLCHAIN_INPUT}" >> $GITHUB_ENV
 
-      # Run the apollo.sh script with both inputs
-      - name: Run apollo.sh script with combined inputs
+      # Determine the SELinux mode input value
+      - name: Set SELinux mode input value
+        id: set_selinux_input
         run: |
-          echo "${DEVICE_INPUT}" | ./apollo.sh
-          echo "${TOOLCHAIN_INPUT}" | ./apollo.sh
+          case "${{ github.event.inputs.selinux }}" in
+            "SELinux Permissive") SELINUX_INPUT=1 ;;
+            "SELinux Enforcing") SELINUX_INPUT=2 ;;
+          esac
+          echo "SELINUX_INPUT=${SELINUX_INPUT}" >> $GITHUB_ENV
+
+      # Determine the KernelSU inclusion input value
+      - name: Set KernelSU inclusion input value
+        id: set_kernelsu_input
+        run: |
+          case "${{ github.event.inputs.kernel_su }}" in
+            "Yes") KERNELSU_INPUT=y ;;
+            "No") KERNELSU_INPUT=n ;;
+          esac
+          echo "KERNELSU_INPUT=${KERNELSU_INPUT}" >> $GITHUB_ENV
+
+      # Run the apollo.sh script with all inputs and send final `y` and `Enter`
+      - name: Run apollo.sh script with all inputs and final `y` and `Enter`
+        run: |
+          { echo "${DEVICE_INPUT}"; echo "${TOOLCHAIN_INPUT}"; echo "${SELINUX_INPUT}"; echo "${KERNELSU_INPUT}"; echo "y"; } | ./apollo.sh
