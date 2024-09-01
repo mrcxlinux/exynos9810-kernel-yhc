@@ -57,6 +57,10 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
+      # Install build-essential package
+      - name: Install build-essential
+        run: sudo apt-get update && sudo apt-get install -y build-essential
+
       # Determine the device input value
       - name: Set device input value
         id: set_device_input
