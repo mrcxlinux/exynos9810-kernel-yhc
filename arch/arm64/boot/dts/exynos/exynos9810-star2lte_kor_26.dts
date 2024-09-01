@@ -12966,8 +12966,8 @@
 		haptic,max_timeout = <0x2710>;
 		haptic,multi_frequency = <0x7>;
 		haptic,frequency = <0x63b 0x4b0 0x5dc 0x7d0 0x708 0x7d0 0x7d0>;
-		haptic,duty = <0x9ede 0xbebc 0x9896 0x7270 0x7f27 0x90f4 0x90f4>;
-		haptic,period = <0xbf68 0xfe50 0xcb73 0x9896 0xa98a 0x9896 0x9896>;
+		haptic,duty   = <34179 45572 36458 27343 30381 37108 37108>;
+		haptic,period = <48828 65104 52083 39062 43402 39062 39062>;
 		haptic,reg2 = <0x82>;
 		haptic,pwm_id = <0x1>;
 		haptic,regulator_name = "VDD_MOTOR_3P3";
