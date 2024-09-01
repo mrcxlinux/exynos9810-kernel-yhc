@@ -1,10 +1,10 @@
-name: Compile Kernel
+name: Compile kernel
 
 on:
   workflow_dispatch:
     inputs:
       device:
-        description: 'Select an option'
+        description: 'Choose device'
         required: true
         type: choice
         options:
@@ -17,6 +17,19 @@ on:
           - build all/zip
           - abort
 
+      toolchain:
+        description: 'Choose toolchain'
+        required: true
+        type: choice
+        options:
+          - "Clang 12 (LLVM +LTO)"
+          - "Clang 14 (LLVM +LTO)"
+          - "Clang 18 (LLVM +LTO PGO Bolt MLGO Polly)"
+          - "Clang 19 (^)"
+          - "Neutron Clang 18 (^)"
+          - "Neutron Clang 19 (^)"
+          - "Neutron Clang 20 (BETA)"
+
 jobs:
   run-apollo-script:
     runs-on: ubuntu-latest
@@ -28,22 +41,39 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      # Determine the input value to send to the script
-      - name: Set input value
-        id: set_input
+      # Determine the device input value
+      - name: Set device input value
+        id: set_device_input
         run: |
           case "${{ github.event.inputs.device }}" in
-            starlte) echo "INPUT_VALUE=1" >> $GITHUB_ENV ;;
-            starltekor) echo "INPUT_VALUE=4" >> $GITHUB_ENV ;;
-            star2lte) echo "INPUT_VALUE=2" >> $GITHUB_ENV ;;
-            star2ltekor) echo "INPUT_VALUE=5" >> $GITHUB_ENV ;;
-            crownlte) echo "INPUT_VALUE=3" >> $GITHUB_ENV ;;
-            crownltekor) echo "INPUT_VALUE=6" >> $GITHUB_ENV ;;
-            "build all/zip") echo "INPUT_VALUE=7" >> $GITHUB_ENV ;;
-            abort) echo "INPUT_VALUE=8" >> $GITHUB_ENV ;;
+            starlte) DEVICE_INPUT=1 ;;
+            starltekor) DEVICE_INPUT=4 ;;
+            star2lte) DEVICE_INPUT=2 ;;
+            star2ltekor) DEVICE_INPUT=5 ;;
+            crownlte) DEVICE_INPUT=3 ;;
+            crownltekor) DEVICE_INPUT=6 ;;
+            "build all/zip") DEVICE_INPUT=7 ;;
+            abort) DEVICE_INPUT=8 ;;
           esac
+          echo "DEVICE_INPUT=${DEVICE_INPUT}" >> $GITHUB_ENV
 
-      # Run the apollo.sh script with the selected input
-      - name: Run apollo.sh script with input
+      # Determine the toolchain input value
+      - name: Set toolchain input value
+        id: set_toolchain_input
         run: |
-          echo "${INPUT_VALUE}" | ./apollo.sh
+          case "${{ github.event.inputs.toolchain }}" in
+            "Clang 12 (LLVM +LTO)") TOOLCHAIN_INPUT=1 ;;
+            "Clang 14 (LLVM +LTO)") TOOLCHAIN_INPUT=2 ;;
+            "Clang 18 (LLVM +LTO PGO Bolt MLGO Polly)") TOOLCHAIN_INPUT=3 ;;
+            "Clang 19 (^)") TOOLCHAIN_INPUT=4 ;;
+            "Neutron Clang 18 (^)") TOOLCHAIN_INPUT=5 ;;
+            "Neutron Clang 19 (^)") TOOLCHAIN_INPUT=6 ;;
+            "Neutron Clang 20 (BETA)") TOOLCHAIN_INPUT=7 ;;
+          esac
+          echo "TOOLCHAIN_INPUT=${TOOLCHAIN_INPUT}" >> $GITHUB_ENV
+
+      # Run the apollo.sh script with both inputs
+      - name: Run apollo.sh script with combined inputs
+        run: |
+          echo "${DEVICE_INPUT}" | ./apollo.sh
+          echo "${TOOLCHAIN_INPUT}" | ./apollo.sh
