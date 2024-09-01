@@ -1,0 +1,29 @@
+name: Compile Kernel
+
+# Allows manual triggering of the workflow with branch selection
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run the script from'
+        required: true
+        default: 'NEXT'
+
+# The jobs that make up the workflow
+jobs:
+  run-test-script:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the specified branch's code
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      # Run the test.sh script
+      - name: Run test.sh script
+        run: |
+          chmod +x ./test.sh
+          ./test.sh
