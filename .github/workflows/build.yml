@@ -59,7 +59,7 @@ jobs:
 
       # Install build-essential package
       - name: Install build-essential
-        run: sudo apt-get update && sudo apt-get install -y build-essential
+        run: sudo apt-get update && sudo apt-get install -y build-essential clang-18
 
       # Determine the device input value
       - name: Set device input value
@@ -112,7 +112,13 @@ jobs:
           esac
           echo "KERNELSU_INPUT=${KERNELSU_INPUT}" >> $GITHUB_ENV
 
-      # Run the apollo.sh script with all inputs and send final `y` and `Enter`
-      - name: Run apollo.sh script with all inputs and final `y` and `Enter`
+      # Run the apollo.sh script with all inputs and send final `y` and `Enter`, then check for "Aborting"
+      - name: Run apollo.sh script and check for Aborting
+        id: run_apollo
         run: |
-          { echo "${DEVICE_INPUT}"; echo "${TOOLCHAIN_INPUT}"; echo "${SELINUX_INPUT}"; echo "${KERNELSU_INPUT}"; echo "y"; } | ./apollo.sh
+          OUTPUT=$( { echo "${DEVICE_INPUT}"; echo "${TOOLCHAIN_INPUT}"; echo "${SELINUX_INPUT}"; echo "${KERNELSU_INPUT}"; echo "y"; } | ./apollo.sh )
+          echo "${OUTPUT}"
+          if echo "${OUTPUT}" | grep -q "Aborting"; then
+            echo "Error: Script output indicates aborting."
+            exit 1
+          fi
