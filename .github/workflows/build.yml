@@ -1,29 +1,49 @@
 name: Compile Kernel
 
-# Allows manual triggering of the workflow with branch selection
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: 'Branch to run the script from'
+      device:
+        description: 'Select an option'
         required: true
-        default: 'NEXT'
+        type: choice
+        options:
+          - starlte
+          - starltekor
+          - star2lte
+          - star2ltekor
+          - crownlte
+          - crownltekor
+          - build all/zip
+          - abort
 
-# The jobs that make up the workflow
 jobs:
-  run-test-script:
-    # The type of runner that the job will run on
+  run-apollo-script:
     runs-on: ubuntu-latest
 
     steps:
-      # Check out the specified branch's code
+      # Check out the code from the branch that triggered the workflow
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ github.ref }}
 
-      # Run the test.sh script
-      - name: Run test.sh script
+      # Determine the input value to send to the script
+      - name: Set input value
+        id: set_input
         run: |
-          chmod +x ./test.sh
-          ./test.sh
+          case "${{ github.event.inputs.device }}" in
+            starlte) echo "INPUT_VALUE=1" >> $GITHUB_ENV ;;
+            starltekor) echo "INPUT_VALUE=4" >> $GITHUB_ENV ;;
+            star2lte) echo "INPUT_VALUE=2" >> $GITHUB_ENV ;;
+            star2ltekor) echo "INPUT_VALUE=5" >> $GITHUB_ENV ;;
+            crownlte) echo "INPUT_VALUE=3" >> $GITHUB_ENV ;;
+            crownltekor) echo "INPUT_VALUE=6" >> $GITHUB_ENV ;;
+            "build all/zip") echo "INPUT_VALUE=7" >> $GITHUB_ENV ;;
+            abort) echo "INPUT_VALUE=8" >> $GITHUB_ENV ;;
+          esac
+
+      # Run the apollo.sh script with the selected input
+      - name: Run apollo.sh script with input
+        run: |
+          echo "${INPUT_VALUE}" | ./apollo.sh
