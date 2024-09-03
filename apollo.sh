@@ -534,7 +534,7 @@ BUILD_DEBUG(){
 echo "----------------------------------------------"
 echo " DEBUG : Debug build initiated "
 CR_TARGET=7
-CR_COMPILER=3
+CR_COMPILER=6
 TC_DL="y"
 CR_SELINUX=0
 CR_KSU="y"
