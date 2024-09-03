@@ -40,15 +40,15 @@ CR_DTB=$CR_DIR/arch/$CR_ARCH/boot/dtb.img
 # defconfig dir
 CR_DEFCONFIG=$CR_DIR/arch/$CR_ARCH/configs
 # Kernel Name and Version
-CR_VERSION=V1.4
-CR_NAME=DS-ACK
+CR_VERSION=NEXT
+CR_NAME=DS-萤火虫
 # Thread count
 CR_JOBS=$(nproc --all)
 # Target Android version
 CR_ANDROID=q
 CR_PLATFORM=13.0.0
 # Current Date
-CR_DATE=$(date +%d.%m.%Y)
+CR_DATE=$(date +%y%m%d)
 # General init
 export ANDROID_MAJOR_VERSION=$CR_ANDROID
 export PLATFORM_VERSION=$CR_PLATFORM
@@ -235,7 +235,7 @@ fi
 
 BUILD_IMAGE_NAME()
 {
-	CR_IMAGE_NAME=$CR_NAME-$CR_VERSION-$CR_VARIANT-$CR_DATE
+	CR_IMAGE_NAME=$CR_NAME-$CR_VERSION-$CR_DATE
 	zver=$CR_NAME-$CR_VERSION-$CR_DATE
     
 }
@@ -360,7 +360,7 @@ BUILD_ZIMAGE()
 	echo "----------------------------------------------"
 	echo " "
 	echo "Building zImage for $CR_VARIANT"
-	export LOCALVERSION=-$CR_IMAGE_NAME
+	export LOCALVERSION=_$CR_IMAGE_NAME
 	echo "Make $CR_CONFIG"
 	$compile $CR_CONFIG
 	echo "Make Kernel with $CR_COMPILER_ARG"
