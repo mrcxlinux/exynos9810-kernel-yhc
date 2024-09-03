@@ -366,9 +366,9 @@ BUILD_ZIMAGE()
 	echo "Make Kernel with $CR_COMPILER_ARG"
 	$compile -j$CR_JOBS
 	if [ ! -e $CR_KERNEL ]; then
+	echo " Aborting "
 	exit 0;
 	echo "Image Failed to Compile"
-	echo " Aborting "
 	fi
 	du -k "$CR_KERNEL" | cut -f1 >sizT
 	sizT=$(head -n 1 sizT)
@@ -385,9 +385,9 @@ BUILD_DTB()
 	echo "Checking DTB for $CR_VARIANT"
 	# This source does compiles dtbs while doing Image
 	if [ ! -e $CR_DTB ]; then
+	echo " Aborting "
         exit 0;
         echo "DTB Failed to Compile"
-        echo " Aborting "
 	else
         echo "DTB Compiled at $CR_DTB"
 	fi
@@ -415,9 +415,9 @@ PACK_BOOT_IMG()
 	# Create boot.img
 	$CR_AIK/repackimg.sh
 	if [ ! -e $CR_AIK/image-new.img ]; then
+	echo "Aborting"
         exit 0;
         echo "Boot Image Failed to pack"
-        echo " Aborting "
 	fi
 	# Remove red warning at boot
 	echo -n "SEANDROIDENFORCE" >> $CR_AIK/image-new.img
@@ -596,9 +596,9 @@ if [ "$CR_TARGET" = "1" ]; then # Always must run ONCE during BUILD_ALL otherwis
 	echo " Copying $CR_BASE_DTB "
 	echo " "
 	if [ ! -e $CR_KERNEL ] || [ ! -e $CR_DTB ]; then
-        exit 0;
-        echo " Kernel not found!"
         echo " Aborting "
+	exit 0;
+        echo " Kernel not found!"
 	else
         cp $CR_KERNEL $CR_BASE_KERNEL
         cp $CR_DTB $CR_BASE_DTB
