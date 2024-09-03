@@ -537,7 +537,7 @@ CR_COMPILER=3
 TC_DL="y"
 CR_SELINUX=0
 CR_KSU="y"
-CR_CLEAN="y"
+CR_CLEAN="n"
 CR_MKZIP="y"
 echo " DEBUG : Set Build options "
 echo " DEBUG : Variant  : $CR_VARIANT_N960F"
