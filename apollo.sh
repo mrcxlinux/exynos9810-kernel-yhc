@@ -18,7 +18,7 @@
 # Main Dir
 CR_DIR=$(pwd)
 # Compiler Dir
-CR_TC=../toolchains
+CR_TC=../compiler
 # Target ARCH
 CR_ARCH=arm64
 # Define proper arch and dir for dts files
@@ -115,7 +115,7 @@ CR_CLANG=$CR_TC/neutron-clang-18.0.0
 fi
 if [ $CR_COMPILER = "6" ]; then
 CR_CLANG_URL=https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/10032024/neutron-clang-10032024.tar.zst
-CR_CLANG=$CR_TC/neutron-clang
+CR_CLANG=$CR_TC/neutron-clang-19.0.0
 fi
 if [ $CR_COMPILER = "7" ]; then
 CR_CLANG=$CR_TC/neutron-clang20-26.07.24
