@@ -75,6 +75,7 @@ CR_CONFIG_KOR=kor_defconfig
 CR_SELINUX="2"
 CR_KSU="n"
 CR_CLEAN="n"
+TC_DL="y"
 # Default Compilation
 DEFAULT_TARGET=3   # crownlte
 DEFAULT_COMPILER=3 # clang18
