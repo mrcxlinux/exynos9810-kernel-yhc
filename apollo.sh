@@ -18,7 +18,7 @@
 # Main Dir
 CR_DIR=$(pwd)
 # Compiler Dir
-CR_TC=$CR_DIR/toolchain
+CR_TC=../compiler
 # Target ARCH
 CR_ARCH=arm64
 # Define proper arch and dir for dts files
@@ -40,15 +40,15 @@ CR_DTB=$CR_DIR/arch/$CR_ARCH/boot/dtb.img
 # defconfig dir
 CR_DEFCONFIG=$CR_DIR/arch/$CR_ARCH/configs
 # Kernel Name and Version
-CR_VERSION=V6.5
-CR_NAME=Apollo
+CR_VERSION=NEXT
+CR_NAME=DS-萤火虫
 # Thread count
 CR_JOBS=$(nproc --all)
 # Target Android version
 CR_ANDROID=q
 CR_PLATFORM=13.0.0
 # Current Date
-CR_DATE=$(date +%Y%m%d)
+CR_DATE=$(date +%y%m%d)
 # General init
 export ANDROID_MAJOR_VERSION=$CR_ANDROID
 export PLATFORM_VERSION=$CR_PLATFORM
@@ -76,7 +76,7 @@ CR_SELINUX="2"
 CR_KSU="n"
 CR_CLEAN="n"
 # Default Compilation
-DEFAULT_TARGET=5   # star2ltekor
+DEFAULT_TARGET=3   # crownlte
 DEFAULT_COMPILER=3 # clang18
 DEFAULT_SELINUX=2  # enforce
 DEFAULT_KSU=y      # enabled
@@ -95,19 +95,19 @@ BUILD_COMPILER()
 
 if [ $CR_COMPILER = "1" ]; then
 CR_CLANG_URL=https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/llvm-r416183/clang-r416183.tar.gz
-CR_CLANG=$CR_TC/clang-r416183
+CR_CLANG=$CR_TC/clang-12.0.4-r416183
 fi
 if [ $CR_COMPILER = "2" ]; then
 CR_CLANG_URL=https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/llvm-r450784/clang-r450784b.tar.gz
-CR_CLANG=$CR_TC/clang-r450784
+CR_CLANG=$CR_TC/clang-14.0.4-r450784
 fi
 if [ $CR_COMPILER = "3" ]; then
 CR_CLANG_URL=https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/llvm-r522817/clang-r522817.tar.gz
-CR_CLANG=$CR_TC/clang-r522817
+CR_CLANG=$CR_TC/clang-18.0.1-r522817
 fi
 if [ $CR_COMPILER = "4" ]; then
 CR_CLANG_URL=https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/llvm-r530567/clang-r530567.tar.gz
-CR_CLANG=$CR_TC/clang-r530567
+CR_CLANG=$CR_TC/clang-19.0.0-r530567
 fi
 if [ $CR_COMPILER = "5" ]; then
 CR_CLANG_URL=https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/05012024/neutron-clang-05012024.tar.zst
@@ -118,10 +118,13 @@ CR_CLANG_URL=https://github.com/Neutron-Toolchains/clang-build-catalogue/release
 CR_CLANG=$CR_TC/neutron-clang-19.0.0
 fi
 if [ $CR_COMPILER = "7" ]; then
+CR_CLANG=$CR_TC/neutron-clang20-26.07.24
+fi
+if [ $CR_COMPILER = "8" ]; then
 CR_CLANG=$CR_TC/clang-custom
 fi
 
-if [ $CR_COMPILER != "7" ]; then
+if [ $CR_COMPILER != "8" ]; then
 	if [ ! -d "$CR_CLANG/bin" ] || [ ! -d "$CR_CLANG/lib" ]; then
 		echo " "
 		echo " $CR_CLANG compiler is missing"
@@ -229,7 +232,7 @@ fi
 
 BUILD_IMAGE_NAME()
 {
-	CR_IMAGE_NAME=$CR_NAME-$CR_VERSION-$CR_VARIANT-$CR_DATE
+	CR_IMAGE_NAME=$CR_NAME-$CR_VERSION-$CR_DATE
 	zver=$CR_NAME-$CR_VERSION-$CR_DATE
     
 }
@@ -251,9 +254,9 @@ BUILD_OPTIONS()
 		echo " Env		- Dirty Build"
 	fi
 	if [ $CR_SELINUX = "1" ]; then
-		echo " Selinux	- Permissive"
+		echo " SELinux	- Permissive"
 	else
-		echo " Selinux	- Enforcing"
+		echo " SELinux	- Enforcing"
 	fi
 	if [[ "$CR_KSU" =~ ^[yY]$ ]]; then
 		if [ -n "$KSU_VERSION" ]; then
@@ -298,17 +301,17 @@ BUILD_GENERATE_CONFIG()
   cat $CR_DEFCONFIG/$CR_CONFIG_APOLLO >> $CR_DEFCONFIG/tmp_defconfig
   # Selinux Never Enforce all targets
   if [ $CR_SELINUX = "1" ]; then
-    echo " Building SElinux Permissive Kernel"
+    echo " Building SELinux Permissive Kernel"
     echo "CONFIG_ALWAYS_PERMISSIVE=y" >> $CR_DEFCONFIG/tmp_defconfig
     CR_IMAGE_NAME=$CR_IMAGE_NAME-Permissive
     zver=$zver-Permissive
   else
-    echo " Building SElinux Enforced Kernel"
+    echo " Building SELinux Enforced Kernel"
   fi
   if [[ "$CR_KSU" =~ ^[yY]$ ]]; then
     echo " Building KernelSU"
     echo "CONFIG_KSU=y" >> $CR_DEFCONFIG/tmp_defconfig
-    CR_IMAGE_NAME=$CR_IMAGE_NAME-ksu
+    CR_IMAGE_NAME=$CR_IMAGE_NAME-KSU
     zver=$zver-KernelSU
   else
     echo "# CONFIG_KSU is not set" >> $CR_DEFCONFIG/tmp_defconfig
@@ -321,7 +324,23 @@ BUILD_GENERATE_CONFIG()
 # Kernel information Function
 BUILD_OUT()
 {
-  echo " "
+# KSU Version
+	KSU_VERSION=$( [ -f "drivers/kernelsu/Makefile" ] && grep -oP '(?<=-DKSU_VERSION=)[0-9]+' drivers/kernelsu/Makefile )
+  echo "----------------------------------------------"
+  echo " Kernel		- $CR_IMAGE_NAME"
+  echo " Device		- $CR_VARIANT"
+  echo " Compiler	- $CR_COMPILER_ARG"
+	if [[ "$CR_CLEAN" =~ ^[yY]$ ]]; then
+		echo " Env		- Clean Build"
+	else
+		echo " Env		- Dirty Build"
+	fi
+	if [ $CR_SELINUX = "1" ]; then
+		echo " SELinux	- Permissive"
+	else
+		echo " SELinux	- Enforcing"
+	fi
+  echo " KernelSU	- Version: $KSU_VERSION"
   echo "----------------------------------------------"
   echo "$CR_VARIANT kernel build finished."
   echo "Compiled DTB Size = $sizdT Kb"
@@ -338,7 +357,7 @@ BUILD_ZIMAGE()
 	echo "----------------------------------------------"
 	echo " "
 	echo "Building zImage for $CR_VARIANT"
-	export LOCALVERSION=-$CR_IMAGE_NAME
+	export LOCALVERSION=_$CR_IMAGE_NAME
 	echo "Make $CR_CONFIG"
 	$compile $CR_CONFIG
 	echo "Make Kernel with $CR_COMPILER_ARG"
@@ -437,7 +456,7 @@ BUILD()
 	fi
 	if [ "$CR_TARGET" = "3" ]
 	then
-		echo " Galaxy Note 9 INTL"
+		echo " Galaxy Note9 INTL"
 		CR_CONFIG_SPLIT=$CR_CONFIG_N960
 		CR_CONFIG_REGION=$CR_CONFIG_INTL
 		CR_VARIANT=$CR_VARIANT_N960F
@@ -459,7 +478,7 @@ BUILD()
 	fi
 	if [ "$CR_TARGET" = "6" ]
 	then
-		echo " Galaxy Note 9 KOR"
+		echo " Galaxy Note9 KOR"
 		CR_CONFIG_SPLIT=$CR_CONFIG_N960
 		CR_CONFIG_REGION=$CR_CONFIG_KOR
 		CR_VARIANT=$CR_VARIANT_N960N
@@ -517,7 +536,7 @@ CR_SELINUX=0
 CR_KSU="y"
 CR_CLEAN="n"
 echo " DEBUG : Set Build options "
-echo " DEBUG : Variant  : $CR_VARIANT_G965N"
+echo " DEBUG : Variant  : $CR_VARIANT_N960F"
 echo " DEBUG : Compiler : Clang 18"
 echo " DEBUG : Selinux  : $CR_SELINUX Enforcing"
 echo " DEBUG : Clean    : $CR_CLEAN"
@@ -639,15 +658,16 @@ echo "----------------------------------------------"
 echo " "
 echo "1) Clang 12 (LLVM +LTO)"
 echo "2) Clang 14 (LLVM +LTO)"
-echo "3) [Default] Clang 18 (LLVM +LTO PGO Bolt Mlgo Poly)"
+echo "3) Clang 18 (LLVM +LTO PGO Bolt MLGO Polly)"
 echo "4) Clang 19 (^)"
 echo "5) Neutron Clang 18 (^)"
 echo "6) Neutron Clang 19 (^)"
-echo "7) Other (Apollo/toolchain/clang-custom)"
+echo "7) Neutron Clang 20 (BETA)"
+echo "8) Other (Apollo/toolchain/clang-custom)"
 echo " "
 read -p "Please select your compiler (1-7) > " CR_COMPILER
 echo " "
-echo "1) Selinux Permissive " "[Default] 2) Selinux Enforcing"
+echo "1) SELinux Permissive "  "2) SELinux Enforcing"
 echo " "
 read -p "Please select your SElinux mode (1-2) > " CR_SELINUX
 echo " "
