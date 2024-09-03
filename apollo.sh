@@ -40,7 +40,7 @@ CR_DTB=$CR_DIR/arch/$CR_ARCH/boot/dtb.img
 # defconfig dir
 CR_DEFCONFIG=$CR_DIR/arch/$CR_ARCH/configs
 # Kernel Name and Version
-CR_VERSION=NEXT
+CR_VERSION=V1.4
 CR_NAME=DS-ACK
 # Thread count
 CR_JOBS=$(nproc --all)
@@ -131,6 +131,9 @@ if [ $CR_COMPILER != "8" ]; then
 		echo " $CR_CLANG compiler is missing"
 		echo " "
 		echo " "
+		if [ ! "$1" = "-cli" ]; then
+		read -p "Download Toolchain ? (y/n) > " TC_DL
+		fi
 		if [ $TC_DL = "y" ]; then
 			echo "Checking URL validity..."
 			URL=$CR_CLANG_URL
@@ -545,9 +548,32 @@ echo " DEBUG : Compiler : Clang 18"
 echo " DEBUG : Selinux  : $CR_SELINUX Enforcing"
 echo " DEBUG : Clean    : $CR_CLEAN"
 echo "----------------------------------------------"
-BUILD_ALL
+BUILD
 echo "----------------------------------------------"
 echo " DEBUG : build completed "
+echo "----------------------------------------------"
+exit 0;
+}
+
+# CLI Flag
+BUILD_CLI(){
+echo "----------------------------------------------"
+echo " CLI build initiated "
+CR_COMPILER=3
+TC_DL="y"
+CR_SELINUX=0
+CR_KSU="y"
+CR_CLEAN="n"
+CR_MKZIP="y"
+echo " CLI : Set Build options "
+echo " CLI : Variant  : $CR_VARIANT_N960F"
+echo " CLI : Compiler : Clang 18"
+echo " CLI : Selinux  : $CR_SELINUX Enforcing"
+echo " CLI : Clean    : $CR_CLEAN"
+echo "----------------------------------------------"
+BUILD_ALL
+echo "----------------------------------------------"
+echo " CLI : build completed "
 echo "----------------------------------------------"
 exit 0;
 }
@@ -653,6 +679,9 @@ echo "----------------------------------------------"
 echo "$CR_NAME $CR_VERSION Build Script $CR_DATE"
 if [ "$1" = "-d" ]; then
 BUILD_DEBUG
+fi
+if [ "$1" = "-cli" ]; then
+BUILD_CLI
 fi
 echo " "
 echo " "
