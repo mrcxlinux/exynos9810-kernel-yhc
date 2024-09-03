@@ -30,7 +30,7 @@ jobs:
 
     - name: Run apollo.sh
       id: run_apollo
-      run: ./apollo.sh -d 2>&1 | tee apollo_output.log
+      run: ./apollo.sh -cli 2>&1 | tee apollo_output.log
 
     - name: Check for "Aborting" in output
       run: |
