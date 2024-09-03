@@ -28,6 +28,9 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y zip bsdiff tar xz-utils build-essential
 
+    - name: Install Neutron Clang 18
+      run: mkdir -p "$HOME/toolchains/neutron-clang" && cd "$HOME/toolchains/neutron-clang" && bash <(curl -s "https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman") -S
+
     - name: Run apollo.sh
       id: run_apollo
       run: ./apollo.sh -d 2>&1 | tee apollo_output.log
