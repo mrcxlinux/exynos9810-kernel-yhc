@@ -40,7 +40,7 @@ CR_DTB=$CR_DIR/arch/$CR_ARCH/boot/dtb.img
 # defconfig dir
 CR_DEFCONFIG=$CR_DIR/arch/$CR_ARCH/configs
 # Kernel Name and Version
-CR_VERSION=V1.4
+CR_VERSION=NEXT
 CR_NAME=DS-ACK
 # Thread count
 CR_JOBS=$(nproc --all)
@@ -75,6 +75,7 @@ CR_CONFIG_KOR=kor_defconfig
 CR_SELINUX="2"
 CR_KSU="n"
 CR_CLEAN="n"
+TC_DL="y"
 # Default Compilation
 DEFAULT_TARGET=3   # crownlte
 DEFAULT_COMPILER=3 # clang18
@@ -130,7 +131,6 @@ if [ $CR_COMPILER != "8" ]; then
 		echo " $CR_CLANG compiler is missing"
 		echo " "
 		echo " "
-		read -p "Download Toolchain ? (y/n) > " TC_DL
 		if [ $TC_DL = "y" ]; then
 			echo "Checking URL validity..."
 			URL=$CR_CLANG_URL
@@ -151,6 +151,7 @@ if [ $CR_COMPILER != "8" ]; then
 				if [ $? -ne 0 ]; then
 					echo "Download failed or was incomplete"
 					echo "Setup Compiler and try again"
+					echo "Aborting"
 					exit 0;
 				fi
 				# Neutron Needs patches
@@ -162,6 +163,7 @@ if [ $CR_COMPILER != "8" ]; then
 				echo "Compiler Downloaded."
 			else
 				echo "Invalid URL: $URL"
+				echo "Aborting"
 				exit 0;
 			fi
 		else
@@ -173,6 +175,7 @@ if [ $CR_COMPILER != "8" ]; then
 else
     if [ ! -d "$CR_CLANG/bin" ] || [ ! -d "$CR_CLANG/lib" ]; then
         echo "clang-custom compiler is missing in $CR_TC/clang-custom"
+	echo "Aborting"
         exit 0;
     fi
 fi
@@ -363,9 +366,9 @@ BUILD_ZIMAGE()
 	echo "Make Kernel with $CR_COMPILER_ARG"
 	$compile -j$CR_JOBS
 	if [ ! -e $CR_KERNEL ]; then
+	echo " Aborting "
 	exit 0;
 	echo "Image Failed to Compile"
-	echo " Abort "
 	fi
 	du -k "$CR_KERNEL" | cut -f1 >sizT
 	sizT=$(head -n 1 sizT)
@@ -382,9 +385,9 @@ BUILD_DTB()
 	echo "Checking DTB for $CR_VARIANT"
 	# This source does compiles dtbs while doing Image
 	if [ ! -e $CR_DTB ]; then
+	echo " Aborting "
         exit 0;
         echo "DTB Failed to Compile"
-        echo " Abort "
 	else
         echo "DTB Compiled at $CR_DTB"
 	fi
@@ -412,9 +415,9 @@ PACK_BOOT_IMG()
 	# Create boot.img
 	$CR_AIK/repackimg.sh
 	if [ ! -e $CR_AIK/image-new.img ]; then
+	echo "Aborting"
         exit 0;
         echo "Boot Image Failed to pack"
-        echo " Abort "
 	fi
 	# Remove red warning at boot
 	echo -n "SEANDROIDENFORCE" >> $CR_AIK/image-new.img
@@ -530,18 +533,19 @@ export -n "CONFIG_MACH_EXYNOS9810_CROWNLTE_KOR"
 BUILD_DEBUG(){
 echo "----------------------------------------------"
 echo " DEBUG : Debug build initiated "
-CR_TARGET=5
 CR_COMPILER=3
+TC_DL="y"
 CR_SELINUX=0
 CR_KSU="y"
 CR_CLEAN="n"
+CR_MKZIP="y"
 echo " DEBUG : Set Build options "
 echo " DEBUG : Variant  : $CR_VARIANT_N960F"
 echo " DEBUG : Compiler : Clang 18"
 echo " DEBUG : Selinux  : $CR_SELINUX Enforcing"
 echo " DEBUG : Clean    : $CR_CLEAN"
 echo "----------------------------------------------"
-BUILD
+BUILD_ALL
 echo "----------------------------------------------"
 echo " DEBUG : build completed "
 echo "----------------------------------------------"
@@ -568,10 +572,12 @@ if ! dpkg-query -W -f='${Status}' bsdiff  | grep "ok installed"; then
 		sudo apt install -y bsdiff
 		if ! dpkg-query -W -f='${Status}' bsdiff | grep "ok installed"; then
 			echo "Failed to install bsdiff. Please try installing it manually."
+			echo "Aborting"
 			exit 0;
 		fi
 	else
 		echo "Please install bsdiff with sudo apt install bsdiff and try again."
+		echo "Aborting"
 		exit 0;
 	fi
 fi
@@ -590,9 +596,9 @@ if [ "$CR_TARGET" = "1" ]; then # Always must run ONCE during BUILD_ALL otherwis
 	echo " Copying $CR_BASE_DTB "
 	echo " "
 	if [ ! -e $CR_KERNEL ] || [ ! -e $CR_DTB ]; then
-        exit 0;
+        echo " Aborting "
+	exit 0;
         echo " Kernel not found!"
-        echo " Abort "
 	else
         cp $CR_KERNEL $CR_BASE_KERNEL
         cp $CR_DTB $CR_BASE_DTB
@@ -607,17 +613,19 @@ if [ ! "$CR_TARGET" = "1" ]; then # Generate patch files for non starlte kernels
 	echo " "
 	if [ ! -e $CR_KERNEL ] || [ ! -e $CR_DTB ]; then
         echo " Kernel not found! "
-        echo " Abort "
+        echo " Aborting "
         exit 0;
 	else
 		bsdiff $CR_BASE_KERNEL $CR_KERNEL $CR_OUTZIP/floyd/$CR_VARIANT-kernel
 		if [ ! -e $CR_OUTZIP/floyd/$CR_VARIANT-kernel ]; then
 			echo "ERROR: bsdiff $CR_BASE_KERNEL $CR_KERNEL $CR_OUTZIP/floyd/$CR_VARIANT-kernel Failed!"
+			echo "Aborting"
 			exit 0;
 		fi
 		bsdiff $CR_BASE_DTB $CR_DTB $CR_OUTZIP/floyd/$CR_VARIANT-dtb
 		if [ ! -e $CR_OUTZIP/floyd/$CR_VARIANT-kernel ]; then
 			echo "ERROR: bsdiff $CR_BASE_KERNEL $CR_DTB $CR_OUTZIP/floyd/$CR_VARIANT-dtb Failed!"
+			echo "Aborting"
 			exit 0;
 		fi
 	fi
