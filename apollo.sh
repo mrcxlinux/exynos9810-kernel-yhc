@@ -327,27 +327,27 @@ BUILD_OUT()
 # KSU Version
 	KSU_VERSION=$( [ -f "drivers/kernelsu/Makefile" ] && grep -oP '(?<=-DKSU_VERSION=)[0-9]+' drivers/kernelsu/Makefile )
   echo "----------------------------------------------"
-  echo " 内核		- $CR_IMAGE_NAME"
-  echo " 设备		- $CR_VARIANT"
-  echo " 编译器 	- $CR_COMPILER_ARG"
+  echo " Kernel		- $CR_IMAGE_NAME"
+  echo " Device		- $CR_VARIANT"
+  echo " Compiler	- $CR_COMPILER_ARG"
 	if [[ "$CR_CLEAN" =~ ^[yY]$ ]]; then
-		echo " Env		- 清理构建"
+		echo " Env		- Clean Build"
 	else
-		echo " Env		- 脏构建"
+		echo " Env		- Dirty Build"
 	fi
 	if [ $CR_SELINUX = "1" ]; then
 		echo " SELinux	- Permissive"
 	else
 		echo " SELinux	- Enforcing"
 	fi
-  echo " KernelSU	- 版本：$KSU_VERSION"
+  echo " KernelSU	- Version: $KSU_VERSION"
   echo "----------------------------------------------"
-  echo "$CR_VARIANT 内核构建完成"
-  echo "编译后的 DTB 大小 = $sizdT Kb"
-  echo "内核镜像     大小 = $sizT Kb"
-  echo "启动镜像     大小 = $sizkT Kb"
-  echo "$CR_PRODUCT/$CR_IMAGE_NAME.img 准备好了"
-  echo "按任意键结束脚本"
+  echo "$CR_VARIANT kernel build finished."
+  echo "Compiled DTB Size = $sizdT Kb"
+  echo "Kernel Image Size = $sizT Kb"
+  echo "Boot Image   Size = $sizkT Kb"
+  echo "$CR_PRODUCT/$CR_IMAGE_NAME.img Ready"
+  echo "Press Any key to end the script"
   echo "----------------------------------------------"
 }
 
@@ -356,16 +356,16 @@ BUILD_ZIMAGE()
 {
 	echo "----------------------------------------------"
 	echo " "
-	echo "为 $CR_VARIANT 构建 zImage"
+	echo "Building zImage for $CR_VARIANT"
 	export LOCALVERSION=_$CR_IMAGE_NAME
-	echo "编译 $CR_CONFIG"
+	echo "Make $CR_CONFIG"
 	$compile $CR_CONFIG
-	echo "使用 $CR_COMPILER_ARG 编译内核"
+	echo "Make Kernel with $CR_COMPILER_ARG"
 	$compile -j$CR_JOBS
 	if [ ! -e $CR_KERNEL ]; then
 	exit 0;
-	echo "镜像编译失败"
-	echo " 中止 "
+	echo "Image Failed to Compile"
+	echo " Abort "
 	fi
 	du -k "$CR_KERNEL" | cut -f1 >sizT
 	sizT=$(head -n 1 sizT)
@@ -631,7 +631,7 @@ if [ "$CR_TARGET" = "6" ]; then # Final kernel build
 	rm -rf sizdz
 	echo " "
 	echo "----------------------------------------------"
-	echo "$CR_NAME 内核构建完成"
+	echo "$CR_NAME kernel build finished."
 	echo "Compiled Package Size = $sizdz Kb"
 	echo "$zver.zip Ready"
 	echo "Press Any key to end the script"
