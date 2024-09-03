@@ -40,15 +40,15 @@ CR_DTB=$CR_DIR/arch/$CR_ARCH/boot/dtb.img
 # defconfig dir
 CR_DEFCONFIG=$CR_DIR/arch/$CR_ARCH/configs
 # Kernel Name and Version
-CR_VERSION=NEXT
-CR_NAME=DS-萤火虫
+CR_VERSION=V1.4
+CR_NAME=DS-ACK
 # Thread count
 CR_JOBS=$(nproc --all)
 # Target Android version
 CR_ANDROID=q
 CR_PLATFORM=13.0.0
 # Current Date
-CR_DATE=$(date +%y%m%d)
+CR_DATE=$(date +%d.%m.%Y)
 # General init
 export ANDROID_MAJOR_VERSION=$CR_ANDROID
 export PLATFORM_VERSION=$CR_PLATFORM
@@ -151,6 +151,7 @@ if [ $CR_COMPILER != "8" ]; then
 				if [ $? -ne 0 ]; then
 					echo "Download failed or was incomplete"
 					echo "Setup Compiler and try again"
+					echo "Aborting"
 					exit 0;
 				fi
 				# Neutron Needs patches
@@ -162,6 +163,7 @@ if [ $CR_COMPILER != "8" ]; then
 				echo "Compiler Downloaded."
 			else
 				echo "Invalid URL: $URL"
+				echo "Aborting"
 				exit 0;
 			fi
 		else
@@ -173,6 +175,7 @@ if [ $CR_COMPILER != "8" ]; then
 else
     if [ ! -d "$CR_CLANG/bin" ] || [ ! -d "$CR_CLANG/lib" ]; then
         echo "clang-custom compiler is missing in $CR_TC/clang-custom"
+	echo "Aborting"
         exit 0;
     fi
 fi
@@ -232,7 +235,7 @@ fi
 
 BUILD_IMAGE_NAME()
 {
-	CR_IMAGE_NAME=$CR_NAME-$CR_VERSION-$CR_DATE
+	CR_IMAGE_NAME=$CR_NAME-$CR_VERSION-$CR_VARIANT-$CR_DATE
 	zver=$CR_NAME-$CR_VERSION-$CR_DATE
     
 }
@@ -357,7 +360,7 @@ BUILD_ZIMAGE()
 	echo "----------------------------------------------"
 	echo " "
 	echo "Building zImage for $CR_VARIANT"
-	export LOCALVERSION=_$CR_IMAGE_NAME
+	export LOCALVERSION=-$CR_IMAGE_NAME
 	echo "Make $CR_CONFIG"
 	$compile $CR_CONFIG
 	echo "Make Kernel with $CR_COMPILER_ARG"
@@ -365,7 +368,7 @@ BUILD_ZIMAGE()
 	if [ ! -e $CR_KERNEL ]; then
 	exit 0;
 	echo "Image Failed to Compile"
-	echo " Abort "
+	echo " Aborting "
 	fi
 	du -k "$CR_KERNEL" | cut -f1 >sizT
 	sizT=$(head -n 1 sizT)
@@ -384,7 +387,7 @@ BUILD_DTB()
 	if [ ! -e $CR_DTB ]; then
         exit 0;
         echo "DTB Failed to Compile"
-        echo " Abort "
+        echo " Aborting "
 	else
         echo "DTB Compiled at $CR_DTB"
 	fi
@@ -414,7 +417,7 @@ PACK_BOOT_IMG()
 	if [ ! -e $CR_AIK/image-new.img ]; then
         exit 0;
         echo "Boot Image Failed to pack"
-        echo " Abort "
+        echo " Aborting "
 	fi
 	# Remove red warning at boot
 	echo -n "SEANDROIDENFORCE" >> $CR_AIK/image-new.img
@@ -530,11 +533,13 @@ export -n "CONFIG_MACH_EXYNOS9810_CROWNLTE_KOR"
 BUILD_DEBUG(){
 echo "----------------------------------------------"
 echo " DEBUG : Debug build initiated "
-CR_TARGET=5
+CR_TARGET=7
 CR_COMPILER=3
+TC_DL="y"
 CR_SELINUX=0
 CR_KSU="y"
-CR_CLEAN="n"
+CR_CLEAN="y"
+CR_MKZIP="y"
 echo " DEBUG : Set Build options "
 echo " DEBUG : Variant  : $CR_VARIANT_N960F"
 echo " DEBUG : Compiler : Clang 18"
@@ -568,10 +573,12 @@ if ! dpkg-query -W -f='${Status}' bsdiff  | grep "ok installed"; then
 		sudo apt install -y bsdiff
 		if ! dpkg-query -W -f='${Status}' bsdiff | grep "ok installed"; then
 			echo "Failed to install bsdiff. Please try installing it manually."
+			echo "Aborting"
 			exit 0;
 		fi
 	else
 		echo "Please install bsdiff with sudo apt install bsdiff and try again."
+		echo "Aborting"
 		exit 0;
 	fi
 fi
@@ -592,7 +599,7 @@ if [ "$CR_TARGET" = "1" ]; then # Always must run ONCE during BUILD_ALL otherwis
 	if [ ! -e $CR_KERNEL ] || [ ! -e $CR_DTB ]; then
         exit 0;
         echo " Kernel not found!"
-        echo " Abort "
+        echo " Aborting "
 	else
         cp $CR_KERNEL $CR_BASE_KERNEL
         cp $CR_DTB $CR_BASE_DTB
@@ -607,17 +614,19 @@ if [ ! "$CR_TARGET" = "1" ]; then # Generate patch files for non starlte kernels
 	echo " "
 	if [ ! -e $CR_KERNEL ] || [ ! -e $CR_DTB ]; then
         echo " Kernel not found! "
-        echo " Abort "
+        echo " Aborting "
         exit 0;
 	else
 		bsdiff $CR_BASE_KERNEL $CR_KERNEL $CR_OUTZIP/floyd/$CR_VARIANT-kernel
 		if [ ! -e $CR_OUTZIP/floyd/$CR_VARIANT-kernel ]; then
 			echo "ERROR: bsdiff $CR_BASE_KERNEL $CR_KERNEL $CR_OUTZIP/floyd/$CR_VARIANT-kernel Failed!"
+			echo "Aborting"
 			exit 0;
 		fi
 		bsdiff $CR_BASE_DTB $CR_DTB $CR_OUTZIP/floyd/$CR_VARIANT-dtb
 		if [ ! -e $CR_OUTZIP/floyd/$CR_VARIANT-kernel ]; then
 			echo "ERROR: bsdiff $CR_BASE_KERNEL $CR_DTB $CR_OUTZIP/floyd/$CR_VARIANT-dtb Failed!"
+			echo "Aborting"
 			exit 0;
 		fi
 	fi
