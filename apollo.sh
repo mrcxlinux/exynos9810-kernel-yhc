@@ -533,7 +533,6 @@ export -n "CONFIG_MACH_EXYNOS9810_CROWNLTE_KOR"
 BUILD_DEBUG(){
 echo "----------------------------------------------"
 echo " DEBUG : Debug build initiated "
-CR_TARGET=7
 CR_COMPILER=3
 TC_DL="y"
 CR_SELINUX=0
@@ -546,7 +545,7 @@ echo " DEBUG : Compiler : Clang 18"
 echo " DEBUG : Selinux  : $CR_SELINUX Enforcing"
 echo " DEBUG : Clean    : $CR_CLEAN"
 echo "----------------------------------------------"
-BUILD
+BUILD_ALL
 echo "----------------------------------------------"
 echo " DEBUG : build completed "
 echo "----------------------------------------------"
