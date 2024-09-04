@@ -40,15 +40,15 @@ CR_DTB=$CR_DIR/arch/$CR_ARCH/boot/dtb.img
 # defconfig dir
 CR_DEFCONFIG=$CR_DIR/arch/$CR_ARCH/configs
 # Kernel Name and Version
-CR_VERSION=NEXT
-CR_NAME=DS-萤火虫
+CR_VERSION=V1.4
+CR_NAME=DS-ACK
 # Thread count
 CR_JOBS=$(nproc --all)
 # Target Android version
 CR_ANDROID=q
 CR_PLATFORM=13.0.0
 # Current Date
-CR_DATE=$(date +%y%m%d)
+CR_DATE=$(date +%d.%m.%Y)
 # General init
 export ANDROID_MAJOR_VERSION=$CR_ANDROID
 export PLATFORM_VERSION=$CR_PLATFORM
@@ -131,6 +131,9 @@ if [ $CR_COMPILER != "8" ]; then
 		echo " $CR_CLANG compiler is missing"
 		echo " "
 		echo " "
+		if [ ! "$1" = "-cli" ]; then
+		read -p "Download Toolchain ? (y/n) > " TC_DL
+		fi
 		if [ $TC_DL = "y" ]; then
 			echo "Checking URL validity..."
 			URL=$CR_CLANG_URL
@@ -235,7 +238,7 @@ fi
 
 BUILD_IMAGE_NAME()
 {
-	CR_IMAGE_NAME=$CR_NAME-$CR_VERSION-$CR_DATE
+	CR_IMAGE_NAME=$CR_NAME-$CR_VERSION-$CR_VARIANT-$CR_DATE
 	zver=$CR_NAME-$CR_VERSION-$CR_DATE
     
 }
@@ -360,7 +363,7 @@ BUILD_ZIMAGE()
 	echo "----------------------------------------------"
 	echo " "
 	echo "Building zImage for $CR_VARIANT"
-	export LOCALVERSION=_$CR_IMAGE_NAME
+	export LOCALVERSION=-$CR_IMAGE_NAME
 	echo "Make $CR_CONFIG"
 	$compile $CR_CONFIG
 	echo "Make Kernel with $CR_COMPILER_ARG"
@@ -545,9 +548,32 @@ echo " DEBUG : Compiler : Clang 18"
 echo " DEBUG : Selinux  : $CR_SELINUX Enforcing"
 echo " DEBUG : Clean    : $CR_CLEAN"
 echo "----------------------------------------------"
-BUILD_ALL
+BUILD
 echo "----------------------------------------------"
 echo " DEBUG : build completed "
+echo "----------------------------------------------"
+exit 0;
+}
+
+# CLI Flag
+BUILD_CLI(){
+echo "----------------------------------------------"
+echo " CLI build initiated "
+CR_COMPILER=3
+TC_DL="y"
+CR_SELINUX=0
+CR_KSU="y"
+CR_CLEAN="n"
+CR_MKZIP="y"
+echo " CLI : Set Build options "
+echo " CLI : Variant  : $CR_VARIANT_N960F"
+echo " CLI : Compiler : Clang 18"
+echo " CLI : Selinux  : $CR_SELINUX Enforcing"
+echo " CLI : Clean    : $CR_CLEAN"
+echo "----------------------------------------------"
+BUILD_ALL
+echo "----------------------------------------------"
+echo " CLI : build completed "
 echo "----------------------------------------------"
 exit 0;
 }
@@ -653,6 +679,9 @@ echo "----------------------------------------------"
 echo "$CR_NAME $CR_VERSION Build Script $CR_DATE"
 if [ "$1" = "-d" ]; then
 BUILD_DEBUG
+fi
+if [ "$1" = "-cli" ]; then
+BUILD_CLI
 fi
 echo " "
 echo " "
