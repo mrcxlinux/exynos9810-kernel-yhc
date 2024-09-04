@@ -131,8 +131,10 @@ if [ $CR_COMPILER != "8" ]; then
 		echo " $CR_CLANG compiler is missing"
 		echo " "
 		echo " "
-		if [ ! "$1" = "-cli" ]; then
-		read -p "Download Toolchain ? (y/n) > " TC_DL
+		if [ "$1" = "-cli" ]; then
+		TC_DL = "y"
+  		else
+    		read -p "Download Toolchain ? (y/n) > " TC_DL
 		fi
 		if [ $TC_DL = "y" ]; then
 			echo "Checking URL validity..."
