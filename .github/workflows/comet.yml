@@ -30,7 +30,7 @@ jobs:
 
     - name: Run apollo.sh
       id: run_apollo
-      run: mkdir Apollo/Out | ./apollo.sh -cli 2>&1 | tee apollo_output.log
+      run: mkdir Apollo/Out | chmod +x apollo.sh | ./apollo.sh -cli 2>&1 | tee apollo_output.log
 
     - name: Check script status
       run: |
