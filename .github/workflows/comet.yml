@@ -28,9 +28,13 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y zip bsdiff tar xz-utils build-essential
 
+    - name: Make apollo.sh be executable
+      id: make_exec_apollo
+      run: sudo chmod +x apollo.sh
+
     - name: Run apollo.sh
       id: run_apollo
-      run: mkdir Apollo/Out | chmod +X apollo.sh | ./apollo.sh -cli 2>&1 | tee apollo_output.log
+      run: mkdir Apollo/Out | ./apollo.sh -cli 2>&1 | tee apollo_output.log
 
     - name: Check script status
       run: |
