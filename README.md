@@ -1,0 +1,34 @@
+# ArtPlus Kernel For Exynos9810
+
+Kernel dedicated to the Exynos 9810 family, more specifically Samsung Galaxy S9 (starlte) / S9+ (star2lte) / Note 9 (crownlte) that aims to bring KernelSU NEXT and SuSFS to OneUI 7.
+
+work in progress.
+
+## Building
+
+### Method 1 (locally)
+
+You need a linux distro (Ubuntu / Deepin / Fedora etc) installed on your computer to build.
+
+To build the kernel you can run the following commands:
+```bash
+ git clone https://github.com/mrcxlinux/exynos9810-kernel-yhc
+ cd exynos9810-kernel-yhc
+ ./apollo.sh
+```
+### Method 2 (workflow / WIP)
+
+To Be Added (`apollo_workflow` branch)
+
+[Workflow File](https://github.com/mrcxlinux/exynos9810-kernel-artplus/raw/refs/heads/apollo_workflow/.github/workflows/comet.yml)
+
+## Installation
+
+To install, you have to flash the IMG file to the “boot” partition, or flash the ZIP in recovery (twrp/ofox etc).
+
+## This wouldn't be possible without...
+
+- [@ananjaser1211](https://github.com/ananjaser1211)
+- [@duhansysl](https://github.com/duhansysl)
+- [@ExtremeXT](https://github.com/ExtremeXT)
+- [@GalaxyBuild-Project](https://github.com/galaxybuild-project)
