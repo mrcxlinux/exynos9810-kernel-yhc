@@ -11,7 +11,7 @@ work in progress.
 You need a linux distro (Ubuntu / Deepin / Fedora etc) installed on your computer to build.
 
 To build the kernel you can run the following commands:
-```
+```bash
  git clone https://github.com/mrcxlinux/exynos9810-kernel-yhc
  cd exynos9810-kernel-yhc
  ./apollo.sh
